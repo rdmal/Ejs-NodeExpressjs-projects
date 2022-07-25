@@ -1,0 +1,19 @@
+ <html>
+    <body>
+        <table>
+            <tr><th>Id</th><th>First</th><th>Last</th></tr>
+            <% users.forEach( user => { %>
+        <tr>
+            <td><a href="/users/<%=users.id%>"><%=user.id%></a></td>
+            <td><%=user.fname%></td>
+            <td><%=user.lname%></td>
+            <td><a href="users/updateUser/<%=user.id%>/<%=user.fname%>/<%=user.lname%>">Update</a>
+                <a href="/users/deleteUser/<%=user.id%>">Delete</a>
+            </td>
+        </tr>
+             <% }) %>
+        </table>
+        <div><a href="/users/insertUser"></a></div>
+
+    </body>
+</html> 

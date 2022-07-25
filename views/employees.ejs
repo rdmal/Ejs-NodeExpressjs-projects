@@ -1,0 +1,22 @@
+<html>
+    <body>
+        <h1>Employees LoginForm</h1>
+        <table>
+
+            <tr><th>Id</th><th>First</th><th>Last</th><th>Department</th><th>&nbsp;</th></tr>
+            <% employees.forEach(employee => {%>
+        <tr>
+            <td><a href="/employees/<%=employee.id%>"><%=employee.id%></a></td>
+            <td><%=employee.fname%></td>
+            <td><%=employee.lname%></td>
+            <td><%=employee.department%></td>
+            <td><a href="employees/updateemployee/<%=employee.id%>/<%=employee.fname%>
+                /<%=employee.lname%>/<%=employee.department%>">Update</a>
+                <a href="/employees/deleteemployee/<%=employee.id%>">Delete</a>
+            </td>
+        </tr>
+             <% }) %>
+        </table>
+        <div><a href="/employees/insertEmployee">Insert</a></div>
+    </body>
+</html>

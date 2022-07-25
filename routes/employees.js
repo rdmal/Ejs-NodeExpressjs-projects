@@ -1,78 +1,54 @@
-var express = require('express');
-var router = express.Router();
+import express from 'express'
+import {dbQueryemployees, dbInsertemployee, dbUpdateemployee, dbDeleteemployee, dbQueryemployee} from '../model/dbHelper.js'
 
-let employees = [
-  {'id': 1, 'fname': 'Amy', 'lname': 'Corse','department': 'Sales Dept'},
-  {'id': 2, 'fname': 'Bob', 'lname': 'smith','department': 'HR Dept'},
-  {'id': 3, 'fname': 'Karen', 'lname': 'Grace','department': 'IT Dept'},
-  {'id': 4, 'fname': 'Lilly', 'lname': 'White','department': 'Delivery Services'},
-  {'id': 5, 'fname': 'Chris', 'lname': 'Gill', 'department': 'Customer Service'}
-]
+const router = express.Router();
+let employees = []
 
-queryEmployees = (request, response) => {
-    console.log('employees='+ JSON.stringify(employees));
-    response.render('employees', {'employees': employees});
-  }
-  
-  queryEmployee =(request, response) => {
-    const{id} = request.params;
-    let employee = employees.find(employee => employee.id == id)
-    console.log('employee='+ JSON.stringify(employee));
-    response.render('employee', {'employee': employee});
-  }
-  deleteEmployee = (request, response) => {
-    const {id} = request.params;
-    employees = employees.filter( employee => employee.id != id)
-    console.log(JSON.stringify(employees));
-    response.render('employees', { employees : employees });
-  }
-  updateEmployeeForm = (request, response) => {
-    console.log("updateEmployee called");
-  
-    const {id} = request.params;
-    const {fname} = request.params;
-    const {lname} = request.params;
-    const {department} = request.params;
-    let employee = { 'id': id, 'fname': fname, 'lname': lname, 'department': department}
-    console.log("id=" + id, ",fname=" +fname + ",lname=" + lname,", department=" + department);
-    response.render('updateEmployee', {'employee':employee});
-  
-  }
-  updateEmployee = (request, response) => {
-    console.log("updateEmployee called");
-    let updateEmployee = request.body;
-    const {id} = request.params;
-    console.log("id=" + id, ",fname=" +fname + ",lname=" + lname + ",department=" + department);
-  
-    let employee = employees.find( employee => employee.id == id)
-    employee.fname = updateEmployee.fname
-    employee.lname = updateEmployee.lname
-    employee.department = updateEmployee.department
-    console.log(JSON.stringify(employee));
-    response.render('employees', { employees : employees });
-  }
-  insertEmployee = (request, response) => {
+const queryemployees = async (request, response) => {
+    employees = await dbQueryEmployees();
+    console.log('queryEmployees: employees=' + JSON.stringify(employees))
+    response.send(employees);
+}
+const queryEmployee = async (request, response) => {
+    const { id } = request.params;
+    let employee = await dbQueryEmployee(id);
+    
+    console.log('queryEmployee: employee=' + JSON.stringify(employee) + ", id=" + id);
+    response.send(employee);
+}
+const insertEmployee= async (request, response) => {
     let employee = request.body;
-    employees = [...employees, employee]
-    console.log(JSON.stringify(employee));
-    response.render('employees', { employees : employees });
-  }
-  insertEmployeeForm = (request, response) => {
-    response.render('InsertEmployee');
-  }
-  insertUpdateEmployee = (request, response) => {
-    let {update} = request.body;
-    if (!update) 
-      insertEmployee( request, response)
-    else
-      updateEmployee( request, response)
-  }
-   
-   router.get('/', queryEmployees);
-   router.post('/', insertUpdateEmployee);
-   router.get('/insertEmployee', insertEmployeeForm);
-   router.get('/deleteEmployee/:id', deleteEmployee);
-   router.get('/:id', queryEmployees);
   
-  module.exports = router;
-  
+    let rows = await dbInsertEmployee(employee);
+    console.log('insertEmployee: employee=' + JSON.stringify(employee))
+    response.send({ "rows": rows });
+}
+const deleteEmployee = async (request, response) => {
+    const { id } = request.params;
+    let rows = await dbDeleteEmployee(id);
+    console.log('deleteEmployee: id=' + id);
+    response.send({ "rows": rows });
+}
+
+const updateEmployee = async (request, response) => {
+    const { id } = request.params;
+    const { fname } = request.body;
+    const { lname } = request.body;
+    const { pword } = request.body;
+    let employee = { "id": id, "fname": fname, "lname": lname, "pword": pword}
+    let rows = await dbUpdateEmployee(employee)
+    if (!employee) {
+        response.send({ "rows": 0 });
+        return;
+    }
+    if (fname) employee.fname = fname;
+    if (lname) employee.lname = lname;
+    if (pword) employee.pword = pword;
+    response.send({ "rows": rows });
+}
+router.get('/', queryEmployees)              // localhost:3000/employees/      GET
+router.get('/:id', queryEmployee)            // localhost:3000/employees/123   GET
+router.post('/', insertEmployee)             // localhost:3000/employees/      POST
+router.put('/:id', updateEmployee)           // localhost:3000/employees/123   PUT
+router.delete('/:id', deleteEmployee)        // localhost:3000/employees/123   DELETE
+export default router
